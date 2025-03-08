@@ -407,9 +407,14 @@ fn run_with_repo(logger: &slog::Logger, config: &Config, repo: &git2::Repository
             command.arg(&base_commit_sha);
         }
 
-        // Don't check that we have successfully absorbed everything, nor git's
-        // exit code -- as git will print helpful messages on its own.
-        command.status().expect("could not run git rebase");
+        if config.dry_run {
+            info!(logger, "would have run git rebase"; "command" => format!("{:?}", command));
+        } else {
+            debug!(logger, "running git rebase"; "command" => format!("{:?}", command));
+            // Don't check that we have successfully absorbed everything, nor git's
+            // exit code -- as git will print helpful messages on its own.
+            command.status().expect("could not run git rebase");
+        }
     }
 
     Ok(())
