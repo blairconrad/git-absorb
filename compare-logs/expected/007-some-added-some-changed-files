@@ -1,0 +1,4 @@
+Apr 16 16:37:54.253 INFO committed, header: +1,-0, commit: 8448ea0d1bc99860812c003a53c5659ce319a01b
+Apr 16 16:37:54.330 INFO committed, header: +1,-0, commit: edb9cdc41bfc6622b15a72f2cc9a75b8c5dfab70
+Apr 16 16:37:54.331 WARN Some changes were not in-place file modifications. Added, removed, or renamed files cannot be automatically absorbed.
+Apr 16 16:37:54.332 INFO To squash the new commits, rebase:, command: git rebase --interactive --autosquash --autostash --root

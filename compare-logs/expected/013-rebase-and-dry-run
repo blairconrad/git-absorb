@@ -1,0 +1,3 @@
+Apr 16 16:37:59.066 INFO would have committed, header: +1,-0, fixup: Initial commit
+Apr 16 16:37:59.105 INFO would have committed, header: +1,-0, fixup: Initial commit
+Apr 16 16:37:59.106 INFO would have run git rebase, command: "git" "-C" "/mnt/e/Dev/git-absorb/log-tests/repos/013-rebase-and-dry-run" "rebase" "--interactive" "--autosquash" "--autostash" "--root"
