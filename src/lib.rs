@@ -2105,6 +2105,51 @@ lines
         messages
     }
 
+    #[test]
+    fn reproducer_issue_37_symlink_to_regular_file() {
+        use std::path::PathBuf;
+
+        // prepare repo with default initial commit
+        let (ctx, test_path) = repo_utils::prepare_repo();
+        let repo = &ctx.repo;
+
+        // create a real target file to be included in the first commit
+        let target_full = ctx.join(&test_path);
+
+        let link_path = PathBuf::from("link.txt");
+        let link_full = ctx.join(&link_path);
+        #[cfg(unix)]
+        {
+            std::os::unix::fs::symlink(&target_full, &link_full).unwrap();
+        }
+        #[cfg(windows)]
+        {
+            std::os::windows::fs::symlink_file(&target_full, &link_full).unwrap();
+        }
+
+        let tree = repo_utils::add(&ctx.repo, &link_path);
+
+        // commit on top of the existing initial commit
+        let first_commit = ctx.repo.head().unwrap().peel_to_commit().unwrap();
+        let commit_message = format!("Add a symbolic link\n");
+        let symlink_commit = repo_utils::commit(&ctx.repo, "HEAD", &commit_message, &tree, &[&first_commit]);
+
+        std::fs::remove_file(&link_full).unwrap();
+        std::fs::write(&link_full, "regular content\n").unwrap();
+
+        let tree = repo_utils::add(&ctx.repo, &link_path);
+        let commit_message = format!("Change symlink to a regular file\n");
+        repo_utils::commit(&ctx.repo, "HEAD", &commit_message, &tree, &[&symlink_commit]);
+
+        std::fs::write(&link_full, "new content\n").unwrap();
+        repo_utils::add(&ctx.repo, &link_path);
+
+        // run git-absorb — this is expected to succeed, but currently triggers
+        // an "old path already occupied" error in the code under test.
+        let capturing_logger = log_utils::CapturingLogger::new();
+        run_with_repo(&capturing_logger.logger, &DEFAULT_CONFIG, &repo).unwrap();
+    }
+
     const DEFAULT_CONFIG: Config = Config {
         dry_run: false,
         no_limit: false,
